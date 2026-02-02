@@ -230,6 +230,12 @@
         <button class="no" id="noBtn" onclick="handleNo()">No 🙄</button>
     </div>
     
+    <div class="share-section" id="shareSection" style="display: none; position: fixed; bottom: 20px; right: 20px; background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 50;">
+        <p style="font-size: 0.9rem; margin-bottom: 0.5rem; color: #d63384;">Share this with someone special:</p>
+        <input type="email" id="userEmail" placeholder="Your email (optional)" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 0.5rem; font-size: 0.9rem;">
+        <button onclick="shareLink()" style="width: 100%; padding: 0.5rem; background: #ff6b9d; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Share Link</button>
+    </div>
+    
     <div class="win-screen" id="winScreen">
         <div class="fortune" id="fortune"></div>
     </div>
@@ -256,11 +262,9 @@
             const noBtn = document.getElementById('noBtn');
             clickCount++;
             
-            // Shrink more each time
             noScale *= 0.85;
             noBtn.style.transform = `scale(${Math.max(noScale, 0.05)})`;
             
-            // Random position
             const randomLeft = Math.random() * 80 + 10;
             const randomTop = Math.random() * 60 + 10;
             
@@ -268,7 +272,6 @@
             noBtn.style.top = randomTop + '%';
             noBtn.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
             
-            // If clicked too many times, make it unclickable or force yes
             if (clickCount > 10) {
                 noBtn.onclick = handleYes;
                 noBtn.textContent = 'Just say Yes! 😏';
@@ -279,7 +282,6 @@
             document.querySelector('h1').style.display = 'none';
             document.querySelector('.container').style.display = 'none';
             
-            // Fade to black
             const body = document.body;
             body.style.transition = 'background 1s ease-in';
             body.style.background = '#000';
@@ -291,17 +293,15 @@
                 const messageText = document.getElementById('messageText');
                 messageText.innerHTML = '<span class="typing">Initializing happiness…</span>';
                 
-                // Show next message after 3 seconds
                 setTimeout(() => {
                     const backgrounds = ['sunset-background', 'stars-background', 'city-lights-background'];
                     const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
                     messageScreen.classList.add(randomBg);
                     
-                    messageText.innerHTML = '<div>I was hoping you\'d say yes.</div>';
+                    messageText.innerHTML = '<div>Thank you, my love! I\'m so lucky to celebrate this day with you.</div>';
                     
-                    // Final message
                     setTimeout(() => {
-                        messageText.innerHTML = '<div>Will you be my Valentine? 💌</div><button class="yes" style="margin-top: 2rem;" onclick="handleYes()">Yes 😍</button>';
+                        messageText.innerHTML = '<div style="margin-bottom: 2rem;">Will you be my Valentine? 💌</div><div id="shareSection" style="background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"><p style="font-size: 0.9rem; margin-bottom: 0.5rem; color: #d63384;">Share this with someone special:</p><input type="email" id="userEmail" placeholder="Your email (optional)" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 0.5rem; font-size: 0.9rem; box-sizing: border-box;"><button onclick="shareLink()" style="width: 100%; padding: 0.5rem; background: #ff6b9d; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Share Link</button></div>';
                     }, 2000);
                 }, 3000);
             }, 1000);
@@ -325,6 +325,48 @@
                     setTimeout(() => heart.remove(), 4000);
                 }, i * 40);
             }
+        }
+        
+        function shareLink() {
+            const userEmail = document.getElementById('userEmail').value;
+            const pageLink = window.location.href;
+            
+            if (userEmail && !isValidEmail(userEmail)) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+            
+            const shareMessage = "Yes, I will be your valentine 💌";
+            const shareText = userEmail 
+                ? `From: ${userEmail}\n\n${shareMessage}\n\nCheck out this Valentine's Day surprise:\n${pageLink}`
+                : `${shareMessage}\n\nCheck out this Valentine's Day surprise:\n${pageLink}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Will You Be My Valentine?',
+                    text: shareText,
+                    url: pageLink
+                }).then(() => {
+                    alert('Thank you for sharing! 💌');
+                }).catch(err => {
+                    console.log('Share cancelled');
+                    fallbackShare(shareText);
+                });
+            } else {
+                fallbackShare(shareText);
+            }
+        }
+        
+        function fallbackShare(shareText) {
+            const encodedText = encodeURIComponent(shareText);
+            const mailtoLink = `mailto:?subject=Yes, I will be your valentine&body=${encodedText}`;
+            window.open(mailtoLink, '_blank');
+            alert('Thank you for sharing! 💌');
+        }
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
         }
     </script>
 </body>
